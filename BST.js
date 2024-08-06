@@ -74,57 +74,50 @@ class Tree {
     }
   }
   delete(value) {
-    let current = this.root;
-    while (true) {
-      console.log(current.value);
-      if (current.value > value) {
-        if (current.left) {
-          if (current.left.value === value) {
-            if (!current.left.left && !current.left.right) {
-              current.left = null;
-              break;
-            } else if (current.left.left && !current.left.right) {
-              current.left = current.left.left;
-              break;
-            } else if (!current.left.left && current.left.right) {
-              current.left = current.left.right;
-              break;
-            } else if (current.left.left && current.left.right) {
-              current.left = current.left.left.right;
-              break;
-            }
-          } else {
-            current = current.left;
-          }
-        }
-      }
-      if (current.value < value) {
-        if (current.right) {
-          if (current.right.value === value) {
-            if (!current.right.left && !current.right.right) {
-              current.right = null;
-              break;
-            } else if (current.right.left && !current.right.right) {
-              current.right = current.right.left;
-              break;
-            } else if (!current.right.left && current.right.right) {
-              current.right = current.right.right;
-              break;
-            } else if (current.right.left && current.right.right) {
-              current.right = current.right.right.left;
-              break;
-            }
-          } else {
-            current = current.right;
-          }
-        }
-      }
+    this.root = this._deleteNode(this.root, value);
+  }
+
+  _deleteNode(root, value) {
+    if (root === null) {
+      return root;
     }
+
+    if (value < root.value) {
+      root.left = this._deleteNode(root.left, value);
+    } else if (value > root.value) {
+      root.right = this._deleteNode(root.right, value);
+    } else {
+      // Node to be deleted found
+
+      // Node with only one child or no child
+      if (root.left === null) {
+        return root.right;
+      } else if (root.right === null) {
+        return root.left;
+      }
+
+      // Node with two children: Get the inorder successor (smallest in the right subtree)
+      root.value = this._minValue(root.right);
+
+      // Delete the inorder successor
+      root.right = this._deleteNode(root.right, root.value);
+    }
+
+    return root;
+  }
+
+  _minValue(node) {
+    let current = node;
+    while (current.left !== null) {
+      current = current.left;
+    }
+    return current.value;
   }
 }
 
 const tree = new Tree();
 tree.buildTree([25, 20, 22, 10, 5, 12, 36, 30, 28, 40, 38, 48]);
 tree.insert(47);
-tree.delete(40);
+tree.delete(40); // doesnt work for higher level nodes
+console.log(tree.root.right.right.right);
 prettyPrint(tree.root);
