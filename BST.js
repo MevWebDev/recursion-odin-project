@@ -139,11 +139,111 @@ class Tree {
     }
     return [parent, node];
   }
+  find(value, node = this.root) {
+    if (node === null) return null;
+    if (node.value === value) return node;
+
+    if (value < node.value) return this.find(value, node.left);
+    return this.find(value, node.right);
+  }
+  levelOrder(cb, node = this.root) {
+    if (!cb) return;
+    if (node === null) return;
+    let queue = [node];
+    while (queue.length > 0) {
+      let currentNode = queue.shift();
+      cb(currentNode);
+
+      if (currentNode.left !== null) {
+        queue.push(currentNode.left);
+      }
+      if (currentNode.right !== null) {
+        queue.push(currentNode.right);
+      }
+    }
+  }
+  inOrder(cb, node = this.root) {
+    if (node === null) return;
+    this.inOrder(cb, node.left);
+    cb(node.value);
+    this.inOrder(cb, node.right);
+  }
+  preOrder(cb, node = this.root) {
+    if (node === null) return;
+    cb(node.value);
+    this.preOrder(cb, node.left);
+    this.preOrder(cb, node.right);
+  }
+  postOrder(cb, node = this.root) {
+    if (node === null) return;
+    this.postOrder(cb, node.left);
+    this.postOrder(cb, node.right);
+    cb(node.value);
+  }
+  height(node = this.root) {
+    if (node === null) return 0;
+    return 1 + Math.max(this.height(node.left), this.height(node.right));
+  }
+
+  depth(node, root = this.root) {
+    if (root === null) return -1;
+    if (root.value === node) return 0;
+    let left = this.depth(node, root.left);
+    let right = this.depth(node, root.right);
+    if (left === -1 && right === -1) return -1;
+    return 1 + Math.max(left, right);
+  }
+  isBalanced(node = this.root) {
+    if (node === null) return true;
+    let leftHeight = this.height(node.left);
+    let rightHeight = this.height(node.right);
+    if (Math.abs(leftHeight - rightHeight) > 1) {
+      return false;
+    }
+    return this.isBalanced(node.left) && this.isBalanced(node.right);
+  }
+  rebalance() {
+    const nodes = [];
+    this.inOrder((value) => nodes.push(value));
+    this.root = this.buildBalancedTree(nodes, 0, nodes.length - 1);
+  }
+  buildBalancedTree(nodes, start, end) {
+    if (start > end) {
+      return null;
+    }
+    let mid = Math.floor((start + end) / 2);
+    let node = new Node(nodes[mid]);
+    node.left = this.buildBalancedTree(nodes, start, mid - 1);
+    node.right = this.buildBalancedTree(nodes, mid + 1, end);
+    return node;
+  }
 }
 
 const tree = new Tree();
 tree.buildTree([25, 20, 10, 22, 5, 12, 36, 30, 28, 40, 38, 48]);
-// tree.insert(9);
-tree.delete(25); // doesnt work for higher level nodes
+tree.insert(49);
+tree.insert(50);
+// tree.delete(25); // doesnt work for higher level nodes
+// console.log(tree.find(40));
+// prettyPrint(tree.root);
+// tree.levelOrder(console.log);
+// tree.postOrder(console.log);
+// console.log(tree.depth(25));
+// console.log(tree.isBalanced());
+// tree.rebalance();
+// prettyPrint(tree.root);
 
-prettyPrint(tree.root);
+function generateRandomArray(cap) {
+  const array = [];
+  for (let i = 0; i < cap; i++) {
+    array.push(Math.floor(Math.random() * 100) + 1);
+  }
+  return array;
+}
+const randomArray = generateRandomArray(10);
+const testTree = new Tree();
+testTree.buildTree(randomArray);
+prettyPrint(testTree.root);
+console.log(testTree.isBalanced());
+testTree.rebalance();
+prettyPrint(testTree.root);
